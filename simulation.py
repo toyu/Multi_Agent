@@ -167,7 +167,7 @@ def simulation2(simulation_num, episode_num, layer_num):
     for i, graph in enumerate(regrets):
         plt.plot(graph, label=labels[i])
     plt.legend(loc="best")
-    plt.savefig("1")
+    plt.savefig("2")
     plt.show()
 
     plt.xlabel('episode')
@@ -176,7 +176,7 @@ def simulation2(simulation_num, episode_num, layer_num):
     for i, graph in enumerate(r_share):
         plt.plot(graph, label=labels[i])
     plt.legend(loc="best")
-    plt.savefig("1")
+    plt.savefig("3")
     plt.show()
 
     plt.xlabel('episode')
@@ -185,10 +185,10 @@ def simulation2(simulation_num, episode_num, layer_num):
     for i, graph in enumerate(reward):
         plt.plot(graph, label=labels[i])
     plt.legend(loc="best")
-    plt.savefig("1")
+    plt.savefig("4")
     plt.show()
 
 
 # simulation1(1000, 1000, 10)
-simulation2(1000, 5000, 2)
+simulation2(10, 5000, 2)
 # simulation2(200, 5000, 5)

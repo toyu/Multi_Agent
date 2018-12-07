@@ -72,49 +72,6 @@ def simulation2(simulation_num, episode_num, layer_num):
 
     return np.array([accuracy, regrets, reward, r_share])
 
-# accuracy /= simulation_num
-# regrets /= simulation_num
-# r_share /= simulation_num
-# reward /= simulation_num
-#
-# plt.xlabel('episode')
-# plt.ylabel('accuracy')
-# # plt.xscale("log")
-# plt.ylim([0.0, 1.1])
-# for i, graph in enumerate(accuracy):
-#         plt.plot(graph, label=labels[i])
-#     plt.legend(loc="best")
-#     plt.savefig("1")
-#     plt.show()
-#
-#     plt.xlabel('episode')
-#     plt.ylabel('regret')
-#     # plt.xscale("log")
-#     for i, graph in enumerate(regrets):
-#         plt.plot(graph, label=labels[i])
-#     plt.legend(loc="best")
-#     plt.savefig("1")
-#     plt.show()
-#
-#     plt.xlabel('episode')
-#     plt.ylabel('r')
-#     # plt.xscale("log")
-#     for i, graph in enumerate(r_share):
-#         plt.plot(graph, label=labels[i])
-#     plt.legend(loc="best")
-#     plt.savefig("1")
-#     plt.show()
-#
-#     plt.xlabel('episode')
-#     plt.ylabel('reward')
-#     # plt.xscale("log")
-#     for i, graph in enumerate(reward):
-#         plt.plot(graph, label=labels[i])
-#     plt.legend(loc="best")
-#     plt.savefig("1")
-#     plt.show()
-#
-
 
 def plot_graph(data, agent_num, data_type_num, episode_num, job_num):
     for i in range(data_type_num):
@@ -123,18 +80,19 @@ def plot_graph(data, agent_num, data_type_num, episode_num, job_num):
         for j in range(job_num):
             graphs += data[j][i]
 
-        # graphs /= simulation_num
-        # plt.xlabel('episode')
-        # plt.ylabel(graph_titles[i])
-        # # plt.xscale("log")
-        # for g, graph in enumerate(graphs):
-        #    plt.plot(graph, label=labels[g])
-        # plt.legend(loc="best")
-        # plt.savefig(graph_titles[i])
-        # plt.show()
+        graphs /= simulation_num
+        plt.xlabel('episode')
+        plt.ylabel(graph_titles[i])
+        # plt.xscale("log")
+        for g, graph in enumerate(graphs):
+           plt.plot(graph, label=labels[g])
+        plt.legend(loc="best")
+        plt.savefig(graph_titles[i])
+        plt.show()
 
-simulation_num = 100
-job_num = 1
+
+simulation_num = 10
+job_num = 10
 simulation_num_per_job = int(simulation_num / job_num)
 episode_num = 5000
 agent_num = 5
