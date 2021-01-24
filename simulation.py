@@ -4,26 +4,28 @@ import math
 import environment as en
 import agent as ag
 
-
+# バンディット問題のシミュレーション
 def simulation1(simulation_num, episode_num, rewards_type_num):
-    labels = ["RS + RS", "RS-OPT", "UCB1T", "e-greedy(0.0025)", "e-greedy_pair(0.005)", "greedy"]
+    # 結果を記録する配列を用意
+    labels = ["UCB1T", "e-greedy(0.0025)", "e-greedy_pair(0.005)", "greedy"]
     accuracy = np.zeros((len(labels), episode_num))
     regrets = np.zeros((len(labels), episode_num))
     r_share = np.zeros(episode_num)
 
+    # 環境の用意
     bandit = en.Deterministic_Bandit(rewards_type_num)
     action_num = bandit.bandit_num
     state_num = 2
     end_state = 1
     r = ((rewards_type_num - 1) + (rewards_type_num - 2)) / 20
 
-    agent_list = [ag.RS_multi('ql', state_num, action_num, 2, r),
-                  ag.RS('ql', state_num, action_num, r),
-                  ag.UCB1T('ql', state_num, action_num),
+    # エージェントを用意
+    agent_list = [ag.UCB1T('ql', state_num, action_num),
                   ag.e_Greedy('ql', state_num, action_num, 0.0025),
                   ag.e_Greedy_multi('ql', state_num, action_num, 2, 0.005),
                   ag.Greedy('ql', state_num, action_num)]
 
+    # シミュレーション
     for sim in range(simulation_num):
         print(sim + 1)
 
@@ -50,10 +52,12 @@ def simulation1(simulation_num, episode_num, rewards_type_num):
 
             # print(regret)
 
+    # それぞれの指標のシミュレーション平均を算出
     accuracy /= simulation_num
     regrets /= simulation_num
     r_share /= simulation_num
 
+    # 結果をプロット
     plt.xlabel('episode')
     plt.ylabel('accuracy')
     # plt.xscale("log")
@@ -82,27 +86,30 @@ def simulation1(simulation_num, episode_num, rewards_type_num):
     plt.savefig("r1")
     plt.show()
 
-
+# ツリーバンディット問題のシミュレーション
 def simulation2(simulation_num, episode_num, layer_num):
+    # 結果を記録する配列を用意
     labels = ["agent_num = 1", "agent_num = 2", "agent_num = 3", "agent_num = 4", "agent_num = 5"]
-    # labels = ["agent_num = 3"]
     agent_num = (len(labels))
     accuracy = np.zeros((agent_num, episode_num))
     regrets = np.zeros((agent_num, episode_num))
     reward = np.zeros((agent_num, episode_num))
     r_share = np.zeros((agent_num, episode_num))
+    
+    # 環境の用意
     action_num = 4
     state_num = sum([int(math.pow(action_num, i)) for i in range(layer_num)]) + 1
     end_state = state_num - 1
     tree_bandit = en.Deterministic_Tree_Bandit(layer_num, action_num)
 
+    # エージェントの用意
     agent_list = [ag.RS_multi('ql', state_num, action_num, 1),
                   ag.RS_multi('ql', state_num, action_num, 2),
                   ag.RS_multi('ql', state_num, action_num, 3),
                   ag.RS_multi('ql', state_num, action_num, 4),
                   ag.RS_multi('ql', state_num, action_num, 5)]
-    # agent_list = [ag.RS_multi('ql', state_num, action_num, 3)]
 
+    # シミュレーション
     for sim in range(simulation_num):
         print(sim + 1)
         tree_bandit.construction_tree_bandit(layer_num)
@@ -146,11 +153,13 @@ def simulation2(simulation_num, episode_num, layer_num):
                 # r_share
                 r_share[i][epi] += agent.get_r()
 
+    # それぞれの指標のシミュレーション平均を算出
     accuracy /= simulation_num
     regrets /= simulation_num
     r_share /= simulation_num
     reward /= simulation_num
 
+    # 結果をプロット
     plt.xlabel('episode')
     plt.ylabel('accuracy')
     # plt.xscale("log")
