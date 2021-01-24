@@ -1,12 +1,12 @@
 import numpy as np
 import math
 
-
+# 貪欲法
 def greedy(values):
     max_values = np.where(values == np.amax(values))
     return np.random.choice(max_values[0])
 
-
+# Q 学習
 class Q_learning():
     def __init__(self, learning_rate=0.1, discount_rate=1.0, state_num=None, action_num=None, initial_value=0):
         # self.learning_rate = learning_rate
@@ -27,15 +27,17 @@ class Q_learning():
             self.Q = np.ones((self.state_num, self.action_num))
             self.Q[self.state_num-1].fill(0)
 
+    # Q値の更新
     def update_Q(self, current_state, current_action, reward, next_state, step):
         TD_error = reward + self.discount_rate * np.amax(self.Q[next_state]) - self.Q[current_state, current_action]
         self.Q[current_state][current_action] += (1 / step) * TD_error
-
+        
     def get_Q(self):
         return self.Q
 
-
+# Sarsa
 class Sarsa(Q_learning):
+    # Q値の更新
     def update_Q(self, current_state, current_action, reward, next_state, next_action, step):
         TD_error = (reward
                     + self.discount_rate * np.amax(self.Q[next_state][next_action])
@@ -43,6 +45,7 @@ class Sarsa(Q_learning):
         self.Q[current_state][current_action] += (1 / step) * TD_error
 
 
+# エージェントの親クラス
 class Agent():
     def __init__(self, policy, state_num, action_num, initial_value=0):
         self.state = 0
@@ -86,6 +89,7 @@ class Greedy(Agent):
         super().update(current_state, current_action, reward, next_state, self.count_action[current_state][current_action])
 
 
+# ε-greedy法
 class e_Greedy(Agent):
     def __init__(self, policy, state_num, action_num, delta):
         super().__init__(policy, state_num, action_num)
@@ -99,9 +103,11 @@ class e_Greedy(Agent):
         self.count_action = np.zeros_like(self.count_action)
         self.e = 1.0
 
+    # εを減衰
     def decay_eps(self):
         self.e -= self.delta
 
+    # 確率εでランダムに、1-εで最も価値が高い腕を選択する
     def select_arm(self, current_state):
         if current_state == 0:
             self.decay_eps()
@@ -111,11 +117,12 @@ class e_Greedy(Agent):
         else:
             return greedy(self.policy.get_Q()[current_state])
 
+    # 価値の更新
     def update(self, current_state, current_action, reward, next_state, step):
         self.count_action[current_state][current_action] += 1
         super().update(current_state, current_action, reward, next_state, self.count_action[current_state][current_action])
 
-
+# ε-greedy法のマルチエージェント版
 class e_Greedy_multi(Agent):
     def __init__(self, policy, state_num, action_num, agent_num, delta):
         self.agent_num = agent_num
@@ -133,6 +140,7 @@ class e_Greedy_multi(Agent):
             actions.append(agent.select_arm(current_state))
         return actions
 
+    # 価値の更新（複数のエージェントで共有している）
     def update(self, current_state, current_action, rewards, next_state, step):
         max_Qs = []
         max_Q_actions = []
@@ -146,7 +154,7 @@ class e_Greedy_multi(Agent):
             for i, max_Q in enumerate(max_Qs):
                 agent.policy.Q[current_state][max_Q_actions[i]] = max_Q
 
-                
+# UCB1T                
 class UCB1T(Agent):
     def __init__(self, policy, state_num, action_num):
         super().__init__(policy, state_num, action_num)
@@ -164,12 +172,14 @@ class UCB1T(Agent):
         self.ucb1t = np.zeros_like(self.ucb1t)
         self.rewards_square = np.zeros_like(self.rewards_square)
 
+    # 腕の選択
     def select_arm(self, current_state):
         if self.count < self.action_num:
             return self.count
         else:
             return greedy(self.ucb1t[current_state])
 
+    # 価値の更新
     def update(self, current_state, current_action, reward, next_state, step):
         self.count += 1
         self.t_current[current_state][current_action] += 1
@@ -183,7 +193,7 @@ class UCB1T(Agent):
                 v = variance + math.sqrt((2.0 * math.log(self.count)) / self.t_current[current_state][action])
                 self.ucb1t[current_state][action] = Q[current_state][action] + math.sqrt((math.log(self.count) / self.t_current[current_state][action]) * min(0.25, v))
 
-
+# PS
 class PS(Agent):
     def __init__(self, policy, num_state, action_num, r):
         super().__init__(policy, num_state, action_num)
@@ -195,6 +205,7 @@ class PS(Agent):
         super().reset_params()
         self.count_action = np.zeros_like(self.count_action)
 
+    # 腕の選択
     def select_arm(self, current_state):
         Q = self.policy.get_Q()
         if np.amax(Q[current_state]) > self.r[current_state]:
