@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-
+# タスクの環境の親クラス
 class Environment(object):
     def __init__(self):
         pass
@@ -15,8 +15,9 @@ class Environment(object):
     def get_regret(self, probability_sum):
         pass
 
-
+# バンディット問題の環境クラス
 class Deterministic_Bandit(Environment):
+    # 初期化、それぞれの腕の報酬を決める
     def __init__(self, reward_type_num):
         self.bandit = np.asarray([])
         for i in range(reward_type_num):
@@ -26,6 +27,7 @@ class Deterministic_Bandit(Environment):
         self.bandit_num = len(self.bandit)
         self.max = np.amax(self.bandit)
 
+    # 報酬を返す
     def get_reward(self, current_state,  current_action):
         if type(current_action) == type([]):
             rewards = []
@@ -34,13 +36,15 @@ class Deterministic_Bandit(Environment):
             return rewards
         else:
             return self.bandit[current_action]
-
+    
+    # 正解の腕か判定する
     def judge_correct(self, current_action):
         if self.max == self.bandit[current_action]:
             return 1
         else:
             return 0
 
+    
     def get_correct(self, current_action):
         if type(current_action) == type([]):
             accuracy = 0
@@ -50,6 +54,7 @@ class Deterministic_Bandit(Environment):
         else:
             return self.judge_correct(current_action)
 
+    # リグレットを返す
     def get_regret(self, current_action):
         if type(current_action) == type([]):
             regret = 0
@@ -59,9 +64,10 @@ class Deterministic_Bandit(Environment):
         else:
             return self.max - self.bandit[current_action]
 
-
+# ツリーバンディット問題の環境クラス
 class Deterministic_Tree_Bandit(Deterministic_Bandit):
     def __init__(self, layer_num, action_num):
+        # 報酬の設定
         self.bandit_array = np.array([[0.1, 0.2, 0.3, 0.5],
                                       [0.1, 0.2, 0.8, 0.9],
                                       [0.1, 0.3, 0.4, 0.6],
@@ -83,6 +89,7 @@ class Deterministic_Tree_Bandit(Deterministic_Bandit):
                 bandit_array_length = len(self.bandit_array)
                 self.tree_bandit.append(self.bandit_array[np.random.randint(bandit_array_length)])
 
+    # 報酬の理論値を返す
     def get_max(self, layer, bandit):
         if layer == self.layer_num:
             return 0
@@ -94,12 +101,14 @@ class Deterministic_Tree_Bandit(Deterministic_Bandit):
 
         return max(probability_sums)
 
+    # 報酬を返す
     def get_reward(self, current_states, current_actions):
         rewards = []
         for i in range(len(current_states)):
             rewards.append(self.tree_bandit[current_states[i]][current_actions[i]])
         return rewards
 
+    # 正解の腕か判定する
     def judge_correct(self, current_action):
         if self.max == self.tree_bandit[current_action]:
             return 1
@@ -113,6 +122,7 @@ class Deterministic_Tree_Bandit(Deterministic_Bandit):
                 accuracy += 1
         return accuracy / len(reward_sums)
 
+    # リグレットを返す
     def get_regret(self, reward_sums):
         regret = 0
         for reward_sum in reward_sums:
